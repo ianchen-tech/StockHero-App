@@ -85,15 +85,15 @@ if check_password():
     
     # 根據當前頁面顯示相應的內容
     if st.session_state.current_page == 'home':
-        st.markdown("# Stock Hero 主控台 📈")
+        st.markdown("# Stock Hero 📈")
         st.markdown("""
-        ### 👋 歡迎使用 Stock Hero!
+        ### 歡迎 👋
         
         請從左側選單選擇功能：
         
         - 📈 **股票詳情**：查看個股詳細資訊            
         - 📊 **股票篩選器**：依照條件篩選股票
-        - 👥 **法人動向**：追蹤法人買賣超
+        - 👥 **法人動向**：查看個股法人買賣超趨勢
         """)
     elif st.session_state.current_page == 'stock_detail':
         stock_detail.render(state=st.session_state.stock_detail_state)

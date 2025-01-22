@@ -169,7 +169,8 @@ def render(state=None):
                             y=result['trade_volume'],
                             name='成交量',
                             marker_color=colors,
-                            opacity=0.7
+                            opacity=0.7,
+                            hovertemplate='成交量: %{y:,}<extra></extra>'
                         ),
                         row=2, col=1
                     )
@@ -192,7 +193,12 @@ def render(state=None):
                             spikedash='solid',
                             spikecolor='gray',
                             rangeslider=dict(visible=True),
-                            hoverformat='%Y/%m/%d'
+                            hoverformat='%Y/%m/%d',
+                            fixedrange=True  # 鎖定 X 軸縮放
+                        ),
+                        xaxis2=dict(
+                            hoverformat='%Y/%m/%d',
+                            fixedrange=True  # 鎖定第二個 X 軸縮放
                         ),
                         yaxis=dict(
                             showspikes=True,
@@ -200,8 +206,13 @@ def render(state=None):
                             spikemode='across',
                             spikethickness=1,
                             spikedash='solid',
-                            spikecolor='gray'
-                        )
+                            spikecolor='gray',
+                            fixedrange=True  # 鎖定 Y 軸縮放
+                        ),
+                        yaxis2=dict(
+                            fixedrange=True  # 鎖定第二個 Y 軸縮放
+                        ),
+                        dragmode=False  # 禁用拖曳
                     )
                     
                     # 顯示圖表
