@@ -1,0 +1,7 @@
+notebook/
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+.git/
+.gitignore

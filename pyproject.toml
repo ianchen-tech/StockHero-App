@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "stockhero"
+version = "0.1.0"
+description = ""
+authors = ["ianycchen <ian@cloud-latitude.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+duckdb = "^1.1.3"
+pandas = "^2.2.3"
+google-cloud-storage = "^2.19.0"
+python-dotenv = "^1.0.1"
+google-cloud-logging = "^3.11.3"
+plotly = "^5.24.1"
+streamlit = "^1.41.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

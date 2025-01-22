@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.env
+
+# Poetry
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+
+# Misc
+.DS_Store
+
+# DuckDB
+*.db
+
+# Backup
+backup/
