@@ -11,7 +11,7 @@ def render():
     # 初始化資料庫連接
     db = DatabaseManager(
         db_path=os.getenv('DB_PATH', 'StockHero.db'),
-        bucket_name=os.getenv('BUCKET_NAME', 'stock-hero')
+        bucket_name=os.getenv('BUCKET_NAME', 'ian-line-bot-files')
     )
     db.connect()
     
