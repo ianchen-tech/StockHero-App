@@ -26,6 +26,9 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 'home'
+# 初始化 stock_detail 相關的 session state
+if 'stock_detail_state' not in st.session_state:
+    st.session_state.stock_detail_state = {}
 
 def check_password():
     """檢查密碼是否正確"""
@@ -58,6 +61,7 @@ if check_password():
         st.markdown("### 功能選單")
         
         # 使用選單來切換頁面
+        previous_page = st.session_state.current_page  # 保存切換前的頁面
         page = st.selectbox(
             "選擇功能",
             options=['首頁', '股票詳情 📈', '股票篩選器 📊', '法人動向 👥'],
@@ -92,4 +96,4 @@ if check_password():
         - 👥 **法人動向**：追蹤法人買賣超
         """)
     elif st.session_state.current_page == 'stock_detail':
-        stock_detail.render()
+        stock_detail.render(state=st.session_state.stock_detail_state)

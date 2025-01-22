@@ -5,7 +5,11 @@ from data.database.db_manager import DatabaseManager
 import os
 from datetime import datetime, timedelta
 
-def render():
+
+def render(state=None):
+    if state is None:
+        state = {}
+        
     st.markdown("# 股票詳情 📈")
     
     # 初始化資料庫連接
@@ -16,10 +20,24 @@ def render():
     db.connect()
     
     try:
+        # 定義股票代碼更新的回調函數
+        def on_stock_id_change():
+            new_stock_id = st.session_state.stock_id_input
+            state['stock_id'] = new_stock_id
+            # 清除日期選擇的狀態，因為新的股票可能有不同的日期範圍
+            state.pop('start_date', None)
+            state.pop('end_date', None)
+
         # 搜尋框
         search_col1, search_col2 = st.columns([3, 1])
         with search_col1:
-            stock_id = st.text_input("請輸入股票代碼", placeholder="例如: 2330")
+            stock_id = st.text_input(
+                "請輸入股票代碼",
+                value=state.get('stock_id', ''),
+                placeholder="例如: 2330",
+                key="stock_id_input",
+                on_change=on_stock_id_change
+            )
         
         if stock_id:
             # 取得該股票的最早和最晚交易日期
@@ -39,22 +57,40 @@ def render():
                 min_date = min_date.date()
                 max_date = max_date.date()
                 
+                # 定義日期更新的回調函數
+                def on_start_date_change():
+                    state['start_date'] = st.session_state.start_date_input
+
+                def on_end_date_change():
+                    state['end_date'] = st.session_state.end_date_input
+                
+                # 從狀態中讀取之前的日期，如果沒有則使用預設值
+                default_start = max_date - timedelta(days=90)
+                default_end = max_date
+                
                 # 日期選擇器
                 col1, col2 = st.columns(2)
                 with col1:
                     start_date = st.date_input(
                         "開始日期",
-                        value=max_date - timedelta(days=90),
+                        value=state.get('start_date', default_start),
                         min_value=min_date,
-                        max_value=max_date
+                        max_value=max_date,
+                        key="start_date_input",
+                        on_change=on_start_date_change
                     )
+                    
                 with col2:
                     end_date = st.date_input(
                         "結束日期",
-                        value=max_date,
+                        value=state.get('end_date', default_end),
                         min_value=min_date,
-                        max_value=max_date
+                        max_value=max_date,
+                        key="end_date_input",
+                        on_change=on_end_date_change
                     )
+                    # 更新狀態
+                    state['end_date'] = end_date
                 
                 # 查詢股票資料
                 query = """
@@ -75,7 +111,7 @@ def render():
                         rows=2, 
                         cols=1,
                         shared_xaxes=True,
-                        vertical_spacing=0.05,
+                        vertical_spacing=0.2,
                         row_heights=[0.7, 0.3]
                     )
                     
@@ -97,8 +133,8 @@ def render():
                                       result['trade_volume']
                                   )],
                             hoverinfo='text+name',
-                            increasing_line_color='red',     # 漲的顏色設為紅色
-                            decreasing_line_color='lightgreen',   # 跌的顏色設為綠色
+                            increasing_line_color='red',
+                            decreasing_line_color='lightgreen',
                         ),
                         row=1, col=1
                     )
@@ -117,7 +153,14 @@ def render():
                         )
                     
                     # 根據漲跌設定成交量顏色
-                    colors = ['lightcoral' if x >= 0 else 'lightgreen' for x in result['change_percent']]
+                    colors = []
+                    for change in result['change_percent']:
+                        if change > 0:
+                            colors.append('lightcoral')
+                        elif change < 0:
+                            colors.append('lightgreen')
+                        else:
+                            colors.append('gold')
                     
                     # 成交量圖
                     fig.add_trace(
@@ -125,7 +168,8 @@ def render():
                             x=result['date'],
                             y=result['trade_volume'],
                             name='成交量',
-                            marker_color=colors  # 設定bar顏色
+                            marker_color=colors,
+                            opacity=0.7
                         ),
                         row=2, col=1
                     )
@@ -135,13 +179,11 @@ def render():
                         title=f'{stock_id} 股價走勢圖',
                         yaxis_title='股價',
                         yaxis2_title='成交量',
-                        xaxis_rangeslider_visible=True,  # 啟用下方的範圍選擇器
+                        xaxis_rangeslider_visible=True,
                         height=800,
-                        # 添加游標線設置
                         hovermode='x unified',
                         hoverdistance=1,
                         spikedistance=1000,
-                        # 設置x軸的參考線和日期格式
                         xaxis=dict(
                             showspikes=True,
                             spikesnap='cursor',
@@ -149,10 +191,9 @@ def render():
                             spikethickness=1,
                             spikedash='solid',
                             spikecolor='gray',
-                            rangeslider=dict(visible=True),  # 啟用範圍選擇器
-                            hoverformat='%Y/%m/%d'  # 設定游標顯示的日期格式為 YYYY/MM/DD
+                            rangeslider=dict(visible=True),
+                            hoverformat='%Y/%m/%d'
                         ),
-                        # 設置y軸的參考線
                         yaxis=dict(
                             showspikes=True,
                             spikesnap='cursor',
