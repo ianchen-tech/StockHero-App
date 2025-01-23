@@ -26,9 +26,11 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 'home'
-# 初始化 stock_detail 相關的 session state
+
 if 'stock_detail_state' not in st.session_state:
     st.session_state.stock_detail_state = {}
+if 'stock_screener_state' not in st.session_state:
+    st.session_state.stock_screener_state = {}
 
 def check_password():
     """檢查密碼是否正確"""
@@ -98,4 +100,4 @@ if check_password():
     elif st.session_state.current_page == 'stock_detail':
         stock_detail.render(state=st.session_state.stock_detail_state)
     elif st.session_state.current_page == 'stock_screener':
-        stock_screener.render()
+        stock_screener.render(state=st.session_state.stock_screener_state)

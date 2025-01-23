@@ -8,8 +8,14 @@ from config.logger import setup_logging
 # 設置 logger
 logger = setup_logging()
 
-def create_condition_card(condition_name, condition_key):
-    """創建條件選擇卡片"""
+def create_condition_card(condition_name, condition_key, state):
+    """
+    創建條件選擇卡片
+    Args:
+        condition_name: 條件名稱
+        condition_key: 條件的鍵值
+        state: 狀態字典
+    """
     card_html = f"""
         <div style="
             padding: 1rem;
@@ -22,13 +28,30 @@ def create_condition_card(condition_name, condition_key):
             <p style="margin-bottom: 0.5rem;">{condition_name}</p>
         </div>
     """
-    return st.checkbox(
+    # 從狀態中獲取條件的選中狀態
+    default_value = state.get(f'condition_{condition_key}', False)
+    
+    is_selected = st.checkbox(
         condition_name,
+        value=default_value,
         key=condition_key,
         help=f"點擊勾選"
     )
+    
+    # 更新狀態
+    state[f'condition_{condition_key}'] = is_selected
+    
+    return is_selected
 
-def render():
+def render(state=None):
+    """
+    渲染股票篩選器
+    Args:
+        state: 用於保存篩選器狀態的字典
+    """
+    if state is None:
+        state = {}
+
     # 使用容器來組織內容
     with st.container():
         # 主標題使用更醒目的樣式
@@ -85,11 +108,11 @@ def render():
             with col1:
                 if st.button("全部選取", key="select_all_conditions"):
                     for key in all_condition_keys:
-                        st.session_state[key] = True
+                        state[f'condition_{key}'] = True
             with col2:
                 if st.button("全部取消", key="deselect_all_conditions"):
                     for key in all_condition_keys:
-                        st.session_state[key] = False
+                        state[f'condition_{key}'] = False
             
             selected_conditions = []
             
@@ -108,7 +131,7 @@ def render():
                             if i + j < len(conditions_list):
                                 condition_key, condition_name = conditions_list[i + j]
                                 with cols[j]:
-                                    if create_condition_card(condition_name, condition_key):
+                                    if create_condition_card(condition_name, condition_key, state):
                                         selected_conditions.append(condition_key)
             
             # 添加分隔線
@@ -140,20 +163,33 @@ def render():
                     # 獲取所有唯一的產業別並添加"全部"選項
                     industries = ['全部'] + sorted(filtered_stocks['industry'].unique().tolist())
                     
+                    # 從狀態中讀取之前選擇的產業別，如果沒有則使用預設值
+                    default_industry_index = industries.index(state.get('selected_industry', '全部')) if state.get('selected_industry') in industries else 0
+                    
                     # 產業別選擇
                     selected_industry = st.selectbox(
                         "選擇產業別",
                         options=industries,
-                        index=0  # 預設選擇"全部"
+                        index=default_industry_index,
+                        key="industry_selector"
                     )
+                    # 更新狀態
+                    state['selected_industry'] = selected_industry
                 
                 with col2:
+                    # 從狀態中讀取之前的搜尋文字
+                    default_search = state.get('stock_id_search', '')
+                    
                     # 股票代號搜尋
                     stock_id_search = st.text_input(
                         "輸入股票代號",
+                        value=default_search,
                         placeholder="例如: 2330",
-                        help="可輸入完整或部分股票代號進行搜尋"
+                        help="可輸入完整或部分股票代號進行搜尋",
+                        key="stock_search"
                     ).strip()
+                    # 更新狀態
+                    state['stock_id_search'] = stock_id_search
                 
                 # 準備顯示資料
                 display_df = pd.DataFrame()
