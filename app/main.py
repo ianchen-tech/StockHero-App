@@ -64,18 +64,18 @@ if check_password():
         previous_page = st.session_state.current_page  # 保存切換前的頁面
         page = st.selectbox(
             "選擇功能",
-            options=['首頁', '股票詳情 📈', '股票篩選器 📊', '法人動向 👥'],
+            options=['首頁', '股票詳情', '股票篩選器', '法人動向'],
             key='page_selector'
         )
         
         # 根據選擇更新當前頁面
         if page == '首頁':
             st.session_state.current_page = 'home'
-        elif page == '股票詳情 📈':
+        elif page == '股票詳情':
             st.session_state.current_page = 'stock_detail'
-        elif page == '股票篩選器 📊':
+        elif page == '股票篩選器':
             st.session_state.current_page = 'stock_screener'
-        elif page == '法人動向 👥':
+        elif page == '法人動向':
             st.session_state.current_page = 'institutional'
         
         # 登出按鈕
@@ -92,8 +92,10 @@ if check_password():
         請從左側選單選擇功能：
         
         - 📈 **股票詳情**：查看個股詳細資訊            
-        - 📊 **股票篩選器**：依照條件篩選股票
+        - 💎 **股票篩選器**：依照條件篩選股票
         - 👥 **法人動向**：查看個股法人買賣超趨勢
         """)
     elif st.session_state.current_page == 'stock_detail':
         stock_detail.render(state=st.session_state.stock_detail_state)
+    elif st.session_state.current_page == 'stock_screener':
+        stock_screener.render()

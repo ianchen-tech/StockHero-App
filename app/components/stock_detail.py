@@ -10,7 +10,7 @@ def render(state=None):
     if state is None:
         state = {}
         
-    st.markdown("# 股票詳情 📈")
+    st.markdown("# 📈 股票詳情")
     
     # 初始化資料庫連接
     db = DatabaseManager(
@@ -254,6 +254,52 @@ def render(state=None):
                         st.metric("開盤價", f"{latest_data['opening_price']:.2f}")
                     with metrics_col4:
                         st.metric("成交筆數", f"{latest_data['transaction_count']:,}")
+                    
+                    st.markdown("###")
+
+                    # 新增表格顯示
+                    st.markdown("### 歷史交易數據")
+                    
+                    # 選擇要顯示的欄位並重新命名
+                    display_columns = {
+                        'date': '日期',
+                        'opening_price': '開盤價',
+                        'highest_price': '最高價',
+                        'lowest_price': '最低價',
+                        'closing_price': '收盤價',
+                        'trade_volume': '成交量',
+                        'transaction_count': '成交筆數',
+                        'change_percent': '漲跌幅(%)',
+                        'ma5': '5日均線',
+                        'ma10': '10日均線',
+                        'ma20': '20日均線',
+                        'ma60': '60日均線'
+                    }
+                    
+                    # 準備顯示用的資料框
+                    display_df = result[display_columns.keys()].copy()
+                    
+                    # 依日期降序排序
+                    display_df = display_df.sort_values('date', ascending=False)
+                    
+                    # 重新命名欄位
+                    display_df.columns = display_columns.values()
+                    
+                    # 格式化數值
+                    display_df['日期'] = display_df['日期'].dt.strftime('%Y-%m-%d')
+                    display_df['成交量'] = display_df['成交量'].apply(lambda x: f"{x:,}")
+                    display_df['成交筆數'] = display_df['成交筆數'].apply(lambda x: f"{x:,}")
+                    for col in ['開盤價', '最高價', '最低價', '收盤價', '5日均線', '10日均線', '20日均線', '60日均線']:
+                        display_df[col] = display_df[col].apply(lambda x: f"{x:.2f}")
+                    display_df['漲跌幅(%)'] = display_df['漲跌幅(%)'].apply(lambda x: f"{x:.2f}")
+                    
+                    # 顯示表格
+                    st.dataframe(
+                        display_df,
+                        use_container_width=True,
+                        height=400,
+                        hide_index=True
+                    )
                     
                 else:
                     st.warning("找不到該股票的資料")
